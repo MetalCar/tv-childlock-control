@@ -4,8 +4,12 @@
   "description": "This tool should handle a configured childlock for the tv.",
   "main": "index.ts",
   "scripts": {
+    "power:off": "ts-node src/power_off.ts",
     "start": "ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "volume:down": "ts-node src/volume_down.ts",
+    "volume:mute": "ts-node src/volume_mute.ts",
+    "volume:up": "ts-node src/volume_up.ts"
   },
   "repository": {
     "type": "git",
