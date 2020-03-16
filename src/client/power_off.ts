@@ -1,8 +1,8 @@
 import SamsungRemote from "samsung-remote";
-import { powerOff } from "./commands/commands";
+import { powerOff } from "../server/commands/commands";
 
 const remote = new SamsungRemote({
-  ip: 'xxx.xxx.xxx.xxx' // required: IP address of your Samsung Smart TV
+  ip: process.env.TV_IP || 'xxx.xxx.xxx.xxx' // required: IP address of your Samsung Smart TV
 });
 
 remote.isAlive((err: any) => {
@@ -10,6 +10,6 @@ remote.isAlive((err: any) => {
     console.log('TV is offline');
   } else {
     console.log('TV is ALIVE!');
-    powerOff(remote, null, null);
+    powerOff(remote, () => null, () => null);
   }
 });

@@ -10,7 +10,8 @@
     "jsx": "react",
     "baseUrl": ".",
     "paths": {
-      "*": ["src/types/*"],
+      "*": ["src/client/types/*"],
+      "*": ["src/server/types/*"],
       "resources/*": ["src/resources/*"]
     }
   },
