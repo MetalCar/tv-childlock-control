@@ -1,12 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { BrowserRouter, Route } from "react-router-dom";
-import {
-  Navbar,
-  Nav,
-  NavDropdown
-} from "react-bootstrap";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Navbar, Nav } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 import TvAliveBadge from "./components/TvAliveBadge";
 import TvButtons from "./components/TvButtons";
 
@@ -22,7 +18,6 @@ ReactDOM.render(
           </Nav>
           <TvButtons />
           <TvAliveBadge />
-          
         </Navbar.Collapse>
       </Navbar>
     </Route>
