@@ -21,9 +21,7 @@ const TvAliveBadge = () => {
   poller.poll();
 
   return !isPolling ? (
-    <Spinner animation="border" role="status">
-      <span className="sr-only">Loading...</span>
-    </Spinner>
+    <Spinner animation="border" role="status" />
   ) : isAlive ? (
     <Badge variant="success">On</Badge>
   ) : (
