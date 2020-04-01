@@ -2,6 +2,7 @@ import express from "express";
 import SamsungRemote from "samsung-remote";
 import cors from "cors";
 import { volumeUp, volumeMute, volumeDown, powerOff } from "./commands/commands";
+import { useTimeLimit } from "./timelimit";
 
 const TV_IP = process.env.TV_IP || 'xxx.xxx.xxx.xxx';
 
@@ -15,17 +16,19 @@ console.log(`Connected TV with IP ${TV_IP}`);
 
 var whitelist = ['http://localhost', 'http://localhost:1234', 'http://localhost:4321', undefined]
 var corsOptions = {
-  origin: function (origin: any, callback: any) {
+  origin: function(origin: any, callback: any) {
     console.log(`Origin ${origin} tries to request`);
     if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true)
+      callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'))
+      callback(new Error("Not allowed by CORS"));
     }
   }
-}
+};
 
-app.use(cors(corsOptions))
+const timeLimit = useTimeLimit(true, remote, console.log, console.error);
+
+app.use(cors(corsOptions));
 
 app.get("/", (request: express.Request, response: express.Response) => {
   response.send("LOL");
@@ -84,5 +87,41 @@ app.get("/tv/power/off", (request: express.Request, response: express.Response) 
     }
   });
 });
+
+app.get(
+  "/tv/timeLimit/on",
+  (_request: express.Request, response: express.Response) => {
+    remote.isAlive((err: any) => {
+      if (err) {
+        response.json({ ...remote, isAlive: false });
+      } else {
+        timeLimit.start();
+        response.json({
+          ...remote,
+          isAlive: true,
+          timeLimite: timeLimit.isActive
+        });
+      }
+    });
+  }
+);
+
+app.get(
+  "/tv/timeLimit/off",
+  (_request: express.Request, response: express.Response) => {
+    remote.isAlive((err: any) => {
+      if (err) {
+        response.json({ ...remote, isAlive: false });
+      } else {
+        timeLimit.stop();
+        response.json({
+          ...remote,
+          isAlive: true,
+          timeLimite: timeLimit.isActive
+        });
+      }
+    });
+  }
+);
 
 app.listen(4321);
