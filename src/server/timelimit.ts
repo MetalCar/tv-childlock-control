@@ -29,21 +29,23 @@ export const useTimeLimit = (
 
   const isLimitActive = () => limitActiveState.getValue();
 
-  const maxMinutesPerDay = () =>
+  const getDailyLimit = () =>
     loadValue<number>(StorageKey.DAILY_LIMIT) || DEFAULT_LIMIT;
-  const resetTimerAt = {
+  const getResetTime = () => ({
     hours: loadValue<number>(StorageKey.RESET_AT_HOUR) || DEFAULT_RESET_HOUR,
     minutes:
       loadValue<number>(StorageKey.RESET_AT_MINUTE) || DEFAULT_RESET_MINUTE
-  };
+  });
 
   // Calculate the date for which to check the contingent.
   // Current time minus time to reset = contingent time
-  const getToday = () =>
-    moment()
-      .subtract(resetTimerAt.hours, "hours")
-      .subtract(resetTimerAt.minutes, "minutes")
+  const getToday = () => {
+    const resetTime = getResetTime();
+    return moment()
+      .subtract(resetTime.hours, "hours")
+      .subtract(resetTime.minutes, "minutes")
       .format("YYYY-MM-DD");
+  };
 
   const getSpentMinutes = (date: string) => {
     const savedTimes = loadValue<TimeMap>(StorageKey.SPENT_MINUTES) || {};
@@ -65,7 +67,7 @@ export const useTimeLimit = (
 
       const today = getToday();
       const spentMinutes = getSpentMinutes(today);
-      if (spentMinutes >= maxMinutesPerDay()) {
+      if (spentMinutes >= getDailyLimit()) {
         powerOff(remote, onSuccess, onError);
       } else {
         saveSpentMinutes(today, spentMinutes + 1);
@@ -88,7 +90,7 @@ export const useTimeLimit = (
       isLimitActive ? "started" : "stopped",
       spentTime,
       "of",
-      maxMinutesPerDay(),
+      getDailyLimit(),
       "minutes spent"
     );
   });
@@ -114,6 +116,12 @@ export const useTimeLimit = (
     },
     start: startTimeLimitWatcher,
     stop: stopTimeLimitWatcher,
-    isActive: isLimitActive
+    isActive: isLimitActive,
+    getStatus: () => ({
+      isActive: isLimitActive(),
+      dailyLimit: getDailyLimit(),
+      timeSpent: getSpentMinutes(getToday()),
+      resetAt: getDailyLimit()
+    })
   };
 };
