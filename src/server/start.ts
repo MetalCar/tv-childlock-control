@@ -83,7 +83,7 @@ app.get(
           () => console.log(`Volume down the TV ${TV_IP}`),
           (error: any) => console.log(error)
         );
-        response.json(mkStatus);
+        response.json(mkStatus());
       }
     });
   }
