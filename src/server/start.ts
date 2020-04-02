@@ -8,13 +8,20 @@ const TV_IP = process.env.TV_IP || 'xxx.xxx.xxx.xxx';
 
 const app = express();
 
-const remote = new SamsungRemote({
-  ip: TV_IP
-});
-
-console.log(`Connected TV with IP ${TV_IP}`);
+let remote: any = {
+  isAlive: (cb: (err: any) => void) => cb(new Error("TV not connected"))
+};
 
 var whitelist = ['http://localhost', 'http://localhost:1234', 'http://localhost:4321', undefined]
+try {
+  remote = new SamsungRemote({
+    ip: TV_IP
+  });
+  console.log(`Connected TV with IP ${TV_IP}`);
+} catch (err) {
+  console.error(err);
+}
+
 var corsOptions = {
   origin: function(origin: any, callback: any) {
     console.log(`Origin ${origin} tries to request`);
@@ -28,6 +35,12 @@ var corsOptions = {
 
 const timeLimit = useTimeLimit(true, remote, console.log, console.error);
 
+const mkStatus = (isAlive = true) => ({
+  ...remote,
+  isAlive,
+  timeLimit: timeLimit.getStatus()
+});
+
 app.use(cors(corsOptions));
 
 app.get("/", (request: express.Request, response: express.Response) => {
@@ -36,72 +49,88 @@ app.get("/", (request: express.Request, response: express.Response) => {
 
 app.get("/tv", (request: express.Request, response: express.Response) => {
   remote.isAlive((err: any) => {
-    if (err) {
-      response.json({ ...remote, isAlive: false });
-    } else {
-      response.json({ ...remote, isAlive: true });
-    }
+    response.json(mkStatus(!err));
   });
 });
 
-app.get("/tv/volume/up", (request: express.Request, response: express.Response) => {
-  remote.isAlive((err: any) => {
-    if (err) {
-      response.json({ ...remote, isAlive: false });
-    } else {
-      volumeUp(remote, () => console.log(`Volume up the TV ${TV_IP}`), (error: any) => console.log(error));
-      response.json({ ...remote, isAlive: true });
-    }
-  });
-});
+app.get(
+  "/tv/volume/up",
+  (request: express.Request, response: express.Response) => {
+    remote.isAlive((err: any) => {
+      if (err) {
+        response.json(mkStatus(false));
+      } else {
+        volumeUp(
+          remote,
+          () => console.log(`Volume up the TV ${TV_IP}`),
+          (error: any) => console.log(error)
+        );
+        response.json(mkStatus());
+      }
+    });
+  }
+);
 
-app.get("/tv/volume/down", (request: express.Request, response: express.Response) => {
-  remote.isAlive((err: any) => {
-    if (err) {
-      response.json({ ...remote, isAlive: false });
-    } else {
-      volumeDown(remote, () => console.log(`Volume down the TV ${TV_IP}`), (error: any) => console.log(error));
-      response.json({ ...remote, isAlive: true });
-    }
-  });
-});
+app.get(
+  "/tv/volume/down",
+  (request: express.Request, response: express.Response) => {
+    remote.isAlive((err: any) => {
+      if (err) {
+        response.json(mkStatus(false));
+      } else {
+        volumeDown(
+          remote,
+          () => console.log(`Volume down the TV ${TV_IP}`),
+          (error: any) => console.log(error)
+        );
+        response.json(mkStatus);
+      }
+    });
+  }
+);
 
-app.get("/tv/volume/mute", (request: express.Request, response: express.Response) => {
-  remote.isAlive((err: any) => {
-    if (err) {
-      response.json({ ...remote, isAlive: false });
-    } else {
-      volumeMute(remote, () => console.log(`Volume mute the TV ${TV_IP}`), (error: any) => console.log(error));
-      response.json({ ...remote, isAlive: true });
-    }
-  });
-});
+app.get(
+  "/tv/volume/mute",
+  (request: express.Request, response: express.Response) => {
+    remote.isAlive((err: any) => {
+      if (err) {
+        response.json(mkStatus(false));
+      } else {
+        volumeMute(
+          remote,
+          () => console.log(`Volume mute the TV ${TV_IP}`),
+          (error: any) => console.log(error)
+        );
+        response.json(mkStatus());
+      }
+    });
+  }
+);
 
-app.get("/tv/power/off", (request: express.Request, response: express.Response) => {
-  remote.isAlive((err: any) => {
-    if (err) {
-      response.json({ ...remote, isAlive: false });
-    } else {
-      powerOff(remote, () => console.log(`Powered off the TV ${TV_IP}`), (error: any) => console.log(error));
-      response.json({ ...remote, isAlive: true });
-    }
-  });
-});
+app.get(
+  "/tv/power/off",
+  (request: express.Request, response: express.Response) => {
+    remote.isAlive((err: any) => {
+      if (err) {
+        response.json(mkStatus(false));
+      } else {
+        powerOff(
+          remote,
+          () => console.log(`Powered off the TV ${TV_IP}`),
+          (error: any) => console.log(error)
+        );
+        response.json(mkStatus());
+      }
+    });
+  }
+);
 
 app.get(
   "/tv/timeLimit/on",
   (_request: express.Request, response: express.Response) => {
     remote.isAlive((err: any) => {
-      if (err) {
-        response.json({ ...remote, isAlive: false });
-      } else {
-        timeLimit.start();
-        response.json({
-          ...remote,
-          isAlive: true,
-          timeLimite: timeLimit.isActive
-        });
-      }
+      timeLimit.start();
+      response.json(mkStatus(!err));
     });
   }
 );
@@ -110,16 +139,8 @@ app.get(
   "/tv/timeLimit/off",
   (_request: express.Request, response: express.Response) => {
     remote.isAlive((err: any) => {
-      if (err) {
-        response.json({ ...remote, isAlive: false });
-      } else {
-        timeLimit.stop();
-        response.json({
-          ...remote,
-          isAlive: true,
-          timeLimite: timeLimit.isActive
-        });
-      }
+      timeLimit.stop();
+      response.json(mkStatus(!err));
     });
   }
 );
