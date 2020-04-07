@@ -126,7 +126,7 @@ app.get(
 );
 
 app.get(
-  "/tv/timeLimit/on",
+  "/tv/time-limit/on",
   (_request: express.Request, response: express.Response) => {
     remote.isAlive((err: any) => {
       timeLimit.start();
@@ -136,7 +136,7 @@ app.get(
 );
 
 app.get(
-  "/tv/timeLimit/off",
+  "/tv/time-limit/off",
   (_request: express.Request, response: express.Response) => {
     remote.isAlive((err: any) => {
       timeLimit.stop();
