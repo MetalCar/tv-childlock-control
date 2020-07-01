@@ -1,4 +1,4 @@
-import { oncePerMinute } from "./minuteTimer";
+import { oncePerFiveSeconds } from "./minuteTimer";
 import moment from "moment";
 import { BehaviorSubject } from "rxjs";
 import { powerOff } from "./commands/commands";
@@ -73,11 +73,11 @@ export const useTimeLimit = (
 
   const handleTimerTick = () => {
     remote.isAlive((err?: Error) => {
-      if (!isLimitActive || err) {
+      logSpendMinutes(isLimitActive());
+
+      if (!isLimitActive() || err) {
         return;
       }
-
-      logSpendMinutes(isLimitActive());
 
       const today = getToday();
       const spentMinutes = getSpentMinutes(today);
@@ -101,7 +101,7 @@ export const useTimeLimit = (
     logSpendMinutes(isLimitActive);
   });
 
-  oncePerMinute.subscribe(handleTimerTick);
+  oncePerFiveSeconds.subscribe(handleTimerTick);
 
   return {
     setLimit: (minutes: number) => {

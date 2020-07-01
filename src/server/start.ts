@@ -13,14 +13,39 @@ let remote: any = {
 };
 
 var whitelist = ['http://localhost', 'http://localhost:1234', 'http://localhost:4321', undefined]
+
 try {
   remote = new SamsungRemote({
     ip: TV_IP
   });
-  console.log(`Connected TV with IP ${TV_IP}`);
+  
 } catch (err) {
   console.error(err);
+}  
+
+const connectToTV = async (callback: () => void) => {
+  try {
+    remote.isAlive((err: boolean) => {
+      if (!err) {
+        console.log(`Connected TV with IP ${TV_IP}`);
+      }
+      
+      callback();
+    });
+    
+  } catch (err) {
+    console.error(err);
+    callback();
+  }  
 }
+
+const wait1sec = () => {
+  setTimeout(function(){
+    connectToTV(wait1sec);
+  }, 1000);
+}
+
+connectToTV(wait1sec);
 
 var corsOptions = {
   origin: function(origin: any, callback: any) {
