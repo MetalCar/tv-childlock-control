@@ -54,6 +54,7 @@
     "typescript": "3.5.2"
   },
   "devDependencies": {
+    "@babel/compat-data": "^7.10.1",
     "@types/cors": "^2.8.6",
     "@types/react": "^16.9.23",
     "@types/react-bootstrap": "^0.32.20",

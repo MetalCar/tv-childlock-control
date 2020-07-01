@@ -59,11 +59,25 @@ export const useTimeLimit = (
     return updatedTimes;
   };
 
+  const logSpendMinutes = (isLimitActive: boolean) => {
+    const spentTime = getSpentMinutes(getToday());
+    console.log(
+      "Time limit watcher",
+      isLimitActive ? "started" : "stopped",
+      spentTime,
+      "of",
+      getDailyLimit(),
+      "minutes spent"
+    );
+  }
+
   const handleTimerTick = () => {
     remote.isAlive((err?: Error) => {
       if (!isLimitActive || err) {
         return;
       }
+
+      logSpendMinutes(isLimitActive());
 
       const today = getToday();
       const spentMinutes = getSpentMinutes(today);
@@ -84,15 +98,7 @@ export const useTimeLimit = (
   };
 
   limitActiveState.subscribe((isLimitActive: boolean) => {
-    const spentTime = getSpentMinutes(getToday());
-    console.log(
-      "Time limit watcher",
-      isLimitActive ? "started" : "stopped",
-      spentTime,
-      "of",
-      getDailyLimit(),
-      "minutes spent"
-    );
+    logSpendMinutes(isLimitActive);
   });
 
   oncePerMinute.subscribe(handleTimerTick);
