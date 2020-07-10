@@ -3,6 +3,7 @@ import SamsungRemote from "samsung-remote";
 import cors from "cors";
 import { volumeUp, volumeMute, volumeDown, powerOff } from "./commands/commands";
 import { useTimeLimit } from "./timelimit";
+import { log } from "./lib/logger";
 
 const TV_IP = process.env.TV_IP || 'xxx.xxx.xxx.xxx';
 
@@ -27,7 +28,7 @@ const connectToTV = async (callback: () => void) => {
   try {
     remote.isAlive((err: boolean) => {
       if (!err) {
-        console.log(`Connected TV with IP ${TV_IP}`);
+        log(`Connected TV with IP ${TV_IP}`);
       }
       
       callback();
@@ -49,7 +50,7 @@ connectToTV(wait1sec);
 
 var corsOptions = {
   origin: function(origin: any, callback: any) {
-    console.log(`Origin ${origin} tries to request`);
+    log(`Origin ${origin} tries to request`);
     if (whitelist.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -87,8 +88,8 @@ app.get(
       } else {
         volumeUp(
           remote,
-          () => console.log(`Volume up the TV ${TV_IP}`),
-          (error: any) => console.log(error)
+          () => log(`Volume up the TV ${TV_IP}`),
+          (error: any) => log(error)
         );
         response.json(mkStatus());
       }
@@ -105,8 +106,8 @@ app.get(
       } else {
         volumeDown(
           remote,
-          () => console.log(`Volume down the TV ${TV_IP}`),
-          (error: any) => console.log(error)
+          () => log(`Volume down the TV ${TV_IP}`),
+          (error: any) => log(error)
         );
         response.json(mkStatus());
       }
@@ -123,8 +124,8 @@ app.get(
       } else {
         volumeMute(
           remote,
-          () => console.log(`Volume mute the TV ${TV_IP}`),
-          (error: any) => console.log(error)
+          () => log(`Volume mute the TV ${TV_IP}`),
+          (error: any) => log(error)
         );
         response.json(mkStatus());
       }
@@ -141,8 +142,8 @@ app.get(
       } else {
         powerOff(
           remote,
-          () => console.log(`Powered off the TV ${TV_IP}`),
-          (error: any) => console.log(error)
+          () => log(`Powered off the TV ${TV_IP}`),
+          (error: any) => log(error)
         );
         response.json(mkStatus());
       }

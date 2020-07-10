@@ -1,5 +1,5 @@
 import { timer } from "rxjs";
 
-const fiveSeconds = 5 * 1000; // ms
+const oneMinute = 60 * 1000; // ms
 
-export const oncePerFiveSeconds = timer(fiveSeconds, fiveSeconds);
+export const oncePerMinute = timer(oneMinute, oneMinute);

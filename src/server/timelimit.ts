@@ -1,8 +1,9 @@
-import { oncePerFiveSeconds } from "./minuteTimer";
+import { oncePerMinute } from "./minuteTimer";
 import moment from "moment";
 import { BehaviorSubject } from "rxjs";
 import { powerOff } from "./commands/commands";
 import { loadValue, persistValue } from "./nodeLocalStorage";
+import { log } from "./lib/logger";
 
 type TimeMap = {
   [date: string]: number;
@@ -15,7 +16,7 @@ enum StorageKey {
   SPENT_MINUTES = "spentMinutes"
 }
 
-const DEFAULT_LIMIT = 120; // minutes
+const DEFAULT_LIMIT = 240; // minutes
 const DEFAULT_RESET_HOUR = 8;
 const DEFAULT_RESET_MINUTE = 0;
 
@@ -61,31 +62,35 @@ export const useTimeLimit = (
 
   const logSpendMinutes = (isLimitActive: boolean) => {
     const spentTime = getSpentMinutes(getToday());
-    console.log(
+    log(
       "Time limit watcher",
       isLimitActive ? "started" : "stopped",
-      spentTime,
+      spentTime.toString(),
       "of",
-      getDailyLimit(),
+      getDailyLimit().toString(),
       "minutes spent"
     );
   }
 
   const handleTimerTick = () => {
+    logSpendMinutes(isLimitActive());
+
+    if (!isLimitActive()) {
+      return;
+    }
+
+    const today = getToday();
+    const spentMinutes = getSpentMinutes(today);
     remote.isAlive((err?: Error) => {
-      logSpendMinutes(isLimitActive());
-
-      if (!isLimitActive() || err) {
-        return;
-      }
-
-      const today = getToday();
-      const spentMinutes = getSpentMinutes(today);
       if (spentMinutes >= getDailyLimit()) {
-        powerOff(remote, onSuccess, onError);
+          if (!err) {
+            powerOff(remote, onSuccess, onError);
+          }
       } else {
-        saveSpentMinutes(today, spentMinutes + 1);
-      }
+        if (!err) {
+          saveSpentMinutes(today, spentMinutes + 1);
+        }
+      } 
     });
   };
 
@@ -101,7 +106,7 @@ export const useTimeLimit = (
     logSpendMinutes(isLimitActive);
   });
 
-  oncePerFiveSeconds.subscribe(handleTimerTick);
+  oncePerMinute.subscribe(handleTimerTick);
 
   return {
     setLimit: (minutes: number) => {
