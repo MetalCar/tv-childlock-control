@@ -5,7 +5,7 @@ import { volumeUp, volumeMute, volumeDown, powerOff } from "./commands/commands"
 import { useTimeLimit } from "./timelimit";
 import { log } from "./lib/logger";
 
-const TV_IP = process.env.TV_IP || 'xxx.xxx.xxx.xxx';
+const TV_IP = process.env.TV_IP || '192.168.178.32';
 
 const app = express();
 
@@ -19,10 +19,10 @@ try {
   remote = new SamsungRemote({
     ip: TV_IP
   });
-  
+
 } catch (err) {
   console.error(err);
-}  
+}
 
 const connectToTV = async (callback: () => void) => {
   try {
@@ -30,14 +30,14 @@ const connectToTV = async (callback: () => void) => {
       if (!err) {
         log(`Connected TV with IP ${TV_IP}`);
       }
-      
+
       callback();
     });
-    
+
   } catch (err) {
     console.error(err);
     callback();
-  }  
+  }
 }
 
 const wait1sec = () => {
